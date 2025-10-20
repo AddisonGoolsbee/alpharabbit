@@ -69,13 +69,13 @@ export default function App(): React.ReactElement {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-gray-400">
-                  <th className="px-4 py-3">Fund</th>
-                  <th className="px-4 py-3">Period</th>
+                  <th className="px-4 py-3">Firm</th>
+                  <th className="px-4 py-3">Quarter</th>
                   <th className="px-4 py-3">Filing Date</th>
-                  <th className="px-4 py-3">Table Value</th>
-                  <th className="px-4 py-3">Link</th>
+                  <th className="px-4 py-3">Holdings</th>
+                  <th className="px-4 py-3">Total Value (USD)</th>
+                  <th className="px-4 py-3">Source</th>
                   <th className="px-4 py-3">CIK</th>
-                  <th className="px-4 py-3 text-right">Holdings</th>
                 </tr>
               </thead>
               <tbody>
@@ -86,10 +86,54 @@ export default function App(): React.ReactElement {
                       onClick={() => setOpenId(openId === id ? null : id)}
                     >
                       <td className="px-4 py-3">{f.fundName ?? ""}</td>
-                      <td className="px-4 py-3">{f.periodOfReport}</td>
-                      <td className="px-4 py-3">{f.filingDate}</td>
                       <td className="px-4 py-3">
-                        {formatNumber(f.tableValueTotal)}
+                        {(() => {
+                          const d = f.periodOfReport
+                            ? new Date(f.periodOfReport)
+                            : null;
+                          if (!d || Number.isNaN(d.getTime()))
+                            return <span className="text-gray-400">-</span>;
+                          const quarter = Math.floor(d.getMonth() / 3) + 1;
+                          return <span className="font-bold">Q{quarter}</span>;
+                        })()}
+                      </td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const s = f.filingDate;
+                          if (!s)
+                            return <span className="text-gray-400">-</span>;
+                          const trimmed = String(s).trim();
+                          if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed))
+                            return trimmed.replace(/-/g, "/");
+                          const d = new Date(trimmed);
+                          if (Number.isNaN(d.getTime()))
+                            return <span className="text-gray-400">-</span>;
+                          const y = d.getFullYear();
+                          const m = String(d.getMonth() + 1).padStart(2, "0");
+                          const day = String(d.getDate()).padStart(2, "0");
+                          return `${y}/${m}/${day}`;
+                        })()}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="inline-flex items-center gap-2 select-none text-sm text-gray-300">
+                          <span className="hover:text-white font-bold">
+                            {f.holdings?.length ?? 0} holding
+                            {f.holdings?.length > 1 ? "s" : ""}
+                          </span>
+                          <svg
+                            className={`w-3 h-3 transform transition-transform ${
+                              openId === id ? "rotate-90" : ""
+                            }`}
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M6 4L14 10L6 16V4Z" fill="currentColor" />
+                          </svg>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {"$" + formatNumber(f.tableValueTotal)}
                       </td>
                       <td className="px-4 py-3">
                         {f.linkToFiling ? (
@@ -100,7 +144,7 @@ export default function App(): React.ReactElement {
                             className="text-indigo-400 hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            filing
+                            link
                           </a>
                         ) : (
                           f.documentLink && (
@@ -118,23 +162,6 @@ export default function App(): React.ReactElement {
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-400">
                         {f.cik}
-                      </td>
-                      <td className="px-4 py-3 text-right w-40">
-                        <div className="inline-flex items-center gap-2 select-none text-sm text-gray-300">
-                          <span className="hover:text-white">
-                            {f.holdings?.length ?? 0} holdings
-                          </span>
-                          <svg
-                            className={`w-3 h-3 transform transition-transform ${
-                              openId === id ? "rotate-90" : ""
-                            }`}
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path d="M6 4L14 10L6 16V4Z" fill="currentColor" />
-                          </svg>
-                        </div>
                       </td>
                     </tr>
 
