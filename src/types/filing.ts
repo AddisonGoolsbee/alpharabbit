@@ -20,8 +20,7 @@ export interface Holding {
 }
 
 export interface Filing {
-  // Note: JSON seed stores filings as an object keyed by filing-id, so `id` is not required inside each filing object
-  cik: string; // 8-digit number as string
+  cik: string;
   filingDate: string; // ISO date yyyy-mm-dd
   acceptedDate?: string; // ISO datetime with offset
   periodOfReport: string;

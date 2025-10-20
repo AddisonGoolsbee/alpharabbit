@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useFilings from "./hooks/useFilings";
-import seed from "./data/seed.json";
 import type { FilingsSeed, Holding } from "./types/filing";
-
-const filingsData = seed as unknown as FilingsSeed;
+import Loader from "./components/Loader";
 
 function formatNumber(n?: number) {
   if (n == null) return "";
@@ -68,7 +66,7 @@ export default function App(): React.ReactElement {
   useEffect(() => {
     if (remoteError) console.error("Firestore error:", remoteError);
   }, [remoteData, remoteLoading, remoteError]);
-  const entries = Object.entries(remoteData ?? filingsData);
+  const entries = Object.entries(remoteData ?? ({} as FilingsSeed));
 
   return (
     <div className="min-h-screen p-8 bg-[#242424] text-white">
@@ -187,6 +185,11 @@ export default function App(): React.ReactElement {
                 ))}
               </tbody>
             </table>
+            <Loader
+              loading={remoteLoading}
+              empty={!remoteLoading && entries.length === 0}
+              emptyText="No filings found."
+            />
           </div>
         </div>
       </div>

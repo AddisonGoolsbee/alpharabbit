@@ -11,12 +11,6 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-console.log("LIVE Firebase env check", {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-});
-
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
