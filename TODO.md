@@ -7,6 +7,8 @@
 - header w/ title, about, last updated, source code
 - logo + browser icon
 - dark/light mode
+- no internet notification
+- stock ticker integration
 
 ## Scraper
 
@@ -18,5 +20,4 @@
 ## Infra
 
 - domain name
-- gh pages hosting
 - gcp lambda thing running every minute

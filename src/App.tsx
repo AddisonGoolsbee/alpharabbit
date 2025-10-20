@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import useFilings from "./hooks/useFilings";
 import seed from "./data/seed.json";
 import type { FilingsSeed, Holding } from "./types/filing";
 
@@ -57,7 +58,17 @@ function HoldingsTable({ holdings }: { holdings: Holding[] }) {
 
 export default function App(): React.ReactElement {
   const [openId, setOpenId] = useState<string | null>(null);
-  const entries = Object.entries(filingsData);
+
+  const {
+    data: remoteData,
+    loading: remoteLoading,
+    error: remoteError,
+  } = useFilings();
+
+  useEffect(() => {
+    if (remoteError) console.error("Firestore error:", remoteError);
+  }, [remoteData, remoteLoading, remoteError]);
+  const entries = Object.entries(remoteData ?? filingsData);
 
   return (
     <div className="min-h-screen p-8 bg-[#242424] text-white">
