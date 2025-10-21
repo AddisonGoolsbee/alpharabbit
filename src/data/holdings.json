@@ -1,0 +1,54 @@
+{
+    "a": [
+        {
+            "nameOfIssuer": "APPLIED DIGITAL CORP",
+            "titleOfClass": "COM NEW",
+            "cusip": "038169207",
+            "value": 77700624,
+            "shrsOrPrnAmt": {
+                "sshPrnamt": 7716050,
+                "sshPrnamtType": "SH"
+            },
+            "investmentDiscretion": "SOLE",
+            "votingAuthority": {
+                "sole": 7716050,
+                "shared": 0,
+                "none": 0
+            }
+        },
+        {
+            "nameOfIssuer": "Amazon.com, Inc.",
+            "titleOfClass": "COM NEW",
+            "cusip": "038169207",
+            "value": 77700624,
+            "shrsOrPrnAmt": {
+                "sshPrnamt": 7716050,
+                "sshPrnamtType": "SH"
+            },
+            "investmentDiscretion": "SOLE",
+            "votingAuthority": {
+                "sole": 7716050,
+                "shared": 0,
+                "none": 0
+            }
+        }
+    ],
+    "b": [
+        {
+            "nameOfIssuer": "Tacos Chukis",
+            "titleOfClass": "COM NEW",
+            "cusip": "038169207",
+            "value": 77700624,
+            "shrsOrPrnAmt": {
+                "sshPrnamt": 7716050,
+                "sshPrnamtType": "SH"
+            },
+            "investmentDiscretion": "SOLE",
+            "votingAuthority": {
+                "sole": 7716050,
+                "shared": 0,
+                "none": 0
+            }
+        }
+    ]
+}

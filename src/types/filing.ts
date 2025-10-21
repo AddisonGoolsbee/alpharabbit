@@ -1,3 +1,5 @@
+import type { Timestamp } from "firebase/firestore";
+
 export interface ShrsOrPrnAmt {
   sshPrnamt: number;
   sshPrnamtType: string;
@@ -19,17 +21,27 @@ export interface Holding {
   votingAuthority: VotingAuthority;
 }
 
-export interface Filing {
+export interface FilingRaw {
   cik: string;
-  filingDate: string; // ISO date yyyy-mm-dd
-  acceptedDate?: string; // ISO datetime with offset
-  periodOfReport: string;
-  effectivenessDate: string;
-  documentLink?: string;
-  linkToFiling?: string;
-  fundName?: string;
+  filingDate: Timestamp;
+  acceptedDate?: Timestamp;
+  periodOfReport: Timestamp;
+  fundName: string;
   tableValueTotal: number;
-  holdings: Holding[];
+  holdingIds: string[];
+  isAmendment: boolean;
 }
 
-export type FilingsSeed = Record<string, Filing>;
+export interface Filing {
+  cik: string;
+  filingDate: Date;
+  acceptedDate?: Date;
+  periodOfReport: Date;
+  linkToFiling: string;
+  fundName: string;
+  tableValueTotal: number;
+  holdingIds: string[];
+  isAmendment: boolean;
+}
+
+export type FilingsMap = Record<string, Filing>;

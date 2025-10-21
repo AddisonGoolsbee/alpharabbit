@@ -1,0 +1,23 @@
+{
+    "0000773411-25-000006": {
+        "cik": 773411,
+        "filingDate": {
+            "seconds": 1760659200,
+            "nanoseconds": 0
+        },
+        "acceptedDate": {
+            "seconds": 1760745873,
+            "nanoseconds": 0
+        },
+        "periodOfReport": {
+            "seconds": 1760659200,
+            "nanoseconds": 0
+        },
+        "fundName": "VALLEY NATIONAL ADVISERS INC",
+        "tableValueTotal": 645575,
+        "holdings": [
+            "a",
+            "b"
+        ]
+    }
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useFilings from "./hooks/useFilings";
-import type { FilingsSeed, Holding } from "./types/filing";
+import getHoldingsForFiling from "./utils/getHoldings";
+import type { FilingsMap, Holding } from "./types/filing";
 import Loader from "./components/Loader";
 
 function formatNumber(n?: number) {
@@ -66,7 +67,7 @@ export default function App(): React.ReactElement {
   useEffect(() => {
     if (remoteError) console.error("Firestore error:", remoteError);
   }, [remoteData, remoteLoading, remoteError]);
-  const entries = Object.entries(remoteData ?? ({} as FilingsSeed));
+  const entries = Object.entries(remoteData ?? ({} as FilingsMap));
 
   return (
     <div className="min-h-screen p-8 bg-[#242424] text-white">
@@ -126,8 +127,8 @@ export default function App(): React.ReactElement {
                       <td className="px-4 py-3">
                         <div className="inline-flex items-center gap-2 select-none text-sm text-gray-300">
                           <span className="hover:text-white font-bold">
-                            {f.holdings?.length ?? 0} holding
-                            {f.holdings?.length > 1 ? "s" : ""}
+                            {getHoldingsForFiling(f).length} holding
+                            {getHoldingsForFiling(f).length > 1 ? "s" : ""}
                           </span>
                           <svg
                             className={`w-3 h-3 transform transition-transform ${
@@ -145,29 +146,15 @@ export default function App(): React.ReactElement {
                         {"$" + formatNumber(f.tableValueTotal)}
                       </td>
                       <td className="px-4 py-3">
-                        {f.linkToFiling ? (
-                          <a
-                            href={f.linkToFiling}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-indigo-400 hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            link
-                          </a>
-                        ) : (
-                          f.documentLink && (
-                            <a
-                              href={f.documentLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-indigo-400 hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              document
-                            </a>
-                          )
-                        )}
+                        <a
+                          href={f.linkToFiling}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-indigo-400 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          link
+                        </a>
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-400">
                         {f.cik}
@@ -177,7 +164,7 @@ export default function App(): React.ReactElement {
                     {openId === id && (
                       <tr className="bg-[#0f0f0f]">
                         <td colSpan={7} className="px-4 py-4">
-                          <HoldingsTable holdings={f.holdings} />
+                          <HoldingsTable holdings={getHoldingsForFiling(f)} />
                         </td>
                       </tr>
                     )}
