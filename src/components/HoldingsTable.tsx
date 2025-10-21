@@ -18,7 +18,7 @@ function HoldingsTable({ holdingsFileKey }: { holdingsFileKey: string }) {
       setError(null);
       try {
         // Join safely; don't encode slashes in the key
-        const url = base.replace(/\/$/, "") + "/" + encodeURI(holdingsFileKey);
+        const url = base + "/" + encodeURI(holdingsFileKey);
 
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error(`holdings fetch failed: ${res.status}`);

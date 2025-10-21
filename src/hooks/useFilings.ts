@@ -4,7 +4,7 @@ import type { FilingsMap, Filing, FilingsFile } from "../utils/types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const base = (import.meta.env.VITE_R2_URL ?? "").toString();
-const FILINGS_URL = `${base}filings.json`;
+const FILINGS_URL = `${base}/filings.json`;
 
 type FilingsResponse = { filings: unknown };
 
