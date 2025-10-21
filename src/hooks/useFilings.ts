@@ -1,13 +1,9 @@
-// src/hooks/useFilings.ts
 import { useCallback, useEffect, useState } from "react";
 import type { FilingsMap, Filing, FilingRaw } from "../utils/types"; // Adjust path if needed
 
-// Ensure VITE_R2_URL starts with https:// in your .env file
 const base = (import.meta.env.VITE_R2_URL ?? "").toString();
-// Make sure the file name matches exactly what your scraper uploads
 const FILINGS_URL = `${base}/filings.json`;
 
-// Define the expected shape of the JSON response from R2
 type FilingsResponse = {
   filings: FilingRaw[];
 };
@@ -16,7 +12,7 @@ type UseFilingsResult = {
   data: FilingsMap | null;
   loading: boolean;
   error: Error | null;
-  refresh: () => Promise<void>; // Keep refresh for manual updates
+  refresh: () => Promise<void>;
 };
 
 export function useFilings(): UseFilingsResult {
@@ -27,10 +23,8 @@ export function useFilings(): UseFilingsResult {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
-    console.log(`Fetching filings from: ${FILINGS_URL}`); // Log the URL
 
     try {
-      // Fetch with no-cache to always get the latest version
       const res = await fetch(FILINGS_URL, { cache: "no-store" });
 
       if (!res.ok) {
@@ -39,7 +33,6 @@ export function useFilings(): UseFilingsResult {
 
       const body: FilingsResponse = await res.json();
 
-      // Basic validation of the response structure
       if (!body || !Array.isArray(body.filings)) {
           throw new Error("Invalid data structure received from filings URL.");
       }
@@ -50,7 +43,6 @@ export function useFilings(): UseFilingsResult {
       console.log(`Received ${filingsRaw.length} raw filings.`); // Log count
 
       for (const item of filingsRaw) {
-        // More robust check for essential fields
         if (!item || !item.accessionNumber || !item.cik || !item.fundName || !item.periodOfReport) {
             console.warn("Skipping invalid or incomplete filing item:", item);
             continue;
@@ -81,11 +73,10 @@ export function useFilings(): UseFilingsResult {
         // Keep periodOfReport as a string (YYYY-MM-DD)
         const periodOfReport = item.periodOfReport ?? undefined;
 
-        // Construct the final Filing object
         const filing: Filing = {
-          ...(item as FilingRaw), // Spread raw item first
+          ...(item as FilingRaw),
           accessionNumber: item.accessionNumber,
-          cik: String(item.cik), // Ensure CIK is a string
+          cik: String(item.cik),
           filingDate: filingDate,
           acceptedDate: acceptedDate,
           periodOfReport: periodOfReport,
@@ -95,11 +86,10 @@ export function useFilings(): UseFilingsResult {
             item.accessionNumber
           }-index.htm`,
           fundName: item.fundName,
-          tableValueTotal: Number(item.tableValueTotal ?? 0), // Ensure number
-          holdingsCount: Number(item.holdingsCount ?? 0), // Ensure number
-          // Handle boolean conversion safely
+          tableValueTotal: Number(item.tableValueTotal ?? 0),
+          holdingsCount: Number(item.holdingsCount ?? 0),
           isAmendment: String(item.isAmendment).toLowerCase() === 'true',
-          holdingsFileKey: item.holdingsFileKey, // Pass through the key
+          holdingsFileKey: item.holdingsFileKey,
         };
 
         result[item.accessionNumber] = filing;
@@ -114,11 +104,11 @@ export function useFilings(): UseFilingsResult {
     } finally {
       setLoading(false);
     }
-  }, []); // Dependency array is empty, fetchAll reference is stable
+  }, []);
 
   useEffect(() => {
-    void fetchAll(); // Run fetch on initial mount
-  }, [fetchAll]); // fetchAll is memoized by useCallback, effect runs once
+    void fetchAll();
+  }, [fetchAll]);
 
   return { data, loading, error, refresh: fetchAll };
 }

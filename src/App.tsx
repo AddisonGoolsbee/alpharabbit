@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { useState, useEffect } from "react";
 import useFilings from "./hooks/useFilings"; // Adjust path if needed
 import type { FilingsMap } from "./utils/types"; // Adjust path if needed
@@ -6,9 +5,7 @@ import Loader from "./components/Loader"; // Adjust path if needed
 import HoldingsTable from "./components/HoldingsTable"; // Adjust path if needed
 import { formatNumber } from "./utils/common"; // Adjust path if needed
 
-// Helper to format Date object into YYYY/MM/DD in EST/EDT
 const estDateFormatter = (date: Date): string => {
-  // Options to get parts in the target timezone
   const options: Intl.DateTimeFormatOptions = {
       timeZone: 'America/New_York',
       year: 'numeric',
@@ -24,7 +21,7 @@ const estDateFormatter = (date: Date): string => {
   if (year && month && day) {
       return `${year}/${month}/${day}`;
   }
-  return 'Invalid Date'; // Fallback
+  return 'Invalid Date';
 };
 
 export default function App(): React.ReactElement {
@@ -45,7 +42,6 @@ export default function App(): React.ReactElement {
     }
   );
 
-  // Log error if it occurs
   useEffect(() => {
     if (remoteError) console.error("R2 storage error:", remoteError);
   }, [remoteError]);
@@ -55,16 +51,12 @@ export default function App(): React.ReactElement {
     <div className="min-h-screen p-8 bg-[#242424] text-white">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-semibold mb-6">Filings</h1>
-
-        {/* --- ADD ERROR DISPLAY --- */}
         {remoteError && (
           <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded relative mb-4" role="alert">
             <strong className="font-bold">Error:</strong>
             <span className="block sm:inline ml-2">{remoteError.message}</span>
           </div>
         )}
-        {/* --- END ERROR DISPLAY --- */}
-
         <div className="bg-[#121212] rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -80,7 +72,6 @@ export default function App(): React.ReactElement {
                 </tr>
               </thead>
               <tbody>
-                {/* Map over sortedEntries */}
                 {sortedEntries.map(([id, f]) => (
                   <React.Fragment key={id}>
                     <tr
@@ -90,7 +81,6 @@ export default function App(): React.ReactElement {
                       <td className="px-4 py-3">{f.fundName ?? ""}</td>
                       <td className="px-4 py-3">
                         {(() => {
-                          // Simplified Quarter Calculation
                           const periodStr = f.periodOfReport;
                           if (!periodStr || typeof periodStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(periodStr)) {
                             return <span className="text-gray-400">-</span>;
@@ -103,7 +93,6 @@ export default function App(): React.ReactElement {
                       </td>
                       <td className="px-4 py-3">
                         {(() => {
-                          // Correct Filing Date Formatting
                           const d = f.filingDate;
                           if (!d) return <span className="text-gray-400">-</span>;
                           return estDateFormatter(d); // Use the formatter
@@ -136,7 +125,7 @@ export default function App(): React.ReactElement {
                           target="_blank"
                           rel="noreferrer"
                           className="text-indigo-400 hover:underline"
-                          onClick={(e) => e.stopPropagation()} // Prevent row click when clicking link
+                          onClick={(e) => e.stopPropagation()}
                         >
                           link
                         </a>
@@ -150,7 +139,6 @@ export default function App(): React.ReactElement {
                     {openId === id && (
                       <tr className="bg-[#0f0f0f]">
                         <td colSpan={7} className="px-4 py-4">
-                          {/* Ensure holdingsFileKey is passed correctly */}
                           <HoldingsTable holdingsFileKey={f.holdingsFileKey} />
                         </td>
                       </tr>
@@ -161,7 +149,6 @@ export default function App(): React.ReactElement {
             </table>
             <Loader
               loading={remoteLoading}
-              // Don't show empty text if there was an error
               empty={!remoteLoading && !remoteError && sortedEntries.length === 0}
               emptyText="No filings found."
             />
