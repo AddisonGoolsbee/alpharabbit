@@ -1,5 +1,3 @@
-import type { Timestamp } from "firebase/firestore";
-
 export interface ShrsOrPrnAmt {
   sshPrnamt: number;
   sshPrnamtType: string;
@@ -29,9 +27,9 @@ export interface HoldingsFile {
 export interface FilingRaw {
   accessionNumber: string;
   cik: string;
-  filingDate: Timestamp;
-  acceptedDate?: Timestamp;
-  periodOfReport: Timestamp;
+  filingDate: string;
+  acceptedDate?: string;
+  periodOfReport: string;
   fundName: string;
   tableValueTotal: number;
   holdingsCount: number;
@@ -46,9 +44,9 @@ export interface FilingsFile {
 export interface Filing {
   accessionNumber: string;
   cik: string;
-  filingDate: Date;
+  filingDate?: Date;
   acceptedDate?: Date;
-  periodOfReport: Date;
+  periodOfReport: string;
   linkToFiling: string;
   fundName: string;
   tableValueTotal: number;

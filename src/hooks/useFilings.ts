@@ -1,35 +1,22 @@
-// useFilings.ts
+// src/hooks/useFilings.ts
 import { useCallback, useEffect, useState } from "react";
-import type { FilingsMap, Filing, FilingsFile } from "../utils/types";
+import type { FilingsMap, Filing, FilingRaw } from "../utils/types"; // Adjust path if needed
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// Ensure VITE_R2_URL starts with https:// in your .env file
 const base = (import.meta.env.VITE_R2_URL ?? "").toString();
+// Make sure the file name matches exactly what your scraper uploads
 const FILINGS_URL = `${base}/filings.json`;
 
-type FilingsResponse = { filings: unknown };
-
-function toDateFlexible(v: unknown): Date | undefined {
-  if (v == null) return undefined;
-  if (v instanceof Date) return v;
-  if (typeof v === "string") return new Date(v);
-  if (typeof v === "number") {
-    // Heuristic: seconds vs ms
-    return new Date(v > 1e12 ? v : v * 1000);
-  }
-  if (typeof v === "object") {
-    const o = v as any;
-    // Firestore Timestamp-like
-    if (typeof o.seconds === "number") return new Date(o.seconds * 1000);
-    if (typeof o._seconds === "number") return new Date(o._seconds * 1000);
-  }
-  return undefined;
-}
+// Define the expected shape of the JSON response from R2
+type FilingsResponse = {
+  filings: FilingRaw[];
+};
 
 type UseFilingsResult = {
   data: FilingsMap | null;
   loading: boolean;
   error: Error | null;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<void>; // Keep refresh for manual updates
 };
 
 export function useFilings(): UseFilingsResult {
@@ -40,47 +27,98 @@ export function useFilings(): UseFilingsResult {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
+    console.log(`Fetching filings from: ${FILINGS_URL}`); // Log the URL
+
     try {
+      // Fetch with no-cache to always get the latest version
       const res = await fetch(FILINGS_URL, { cache: "no-store" });
-      if (!res.ok) throw new Error(`filings fetch failed: ${res.status}`);
-      const body = (await res.json()) as FilingsResponse;
+
+      if (!res.ok) {
+        throw new Error(`Filings fetch failed: ${res.status} ${res.statusText}`);
+      }
+
+      const body: FilingsResponse = await res.json();
+
+      // Basic validation of the response structure
+      if (!body || !Array.isArray(body.filings)) {
+          throw new Error("Invalid data structure received from filings URL.");
+      }
 
       const result: FilingsMap = {};
-      const filingsRaw = (body as FilingsFile).filings;
+      const filingsRaw = body.filings;
+
+      console.log(`Received ${filingsRaw.length} raw filings.`); // Log count
 
       for (const item of filingsRaw) {
-        if (!item.accessionNumber) continue;
+        // More robust check for essential fields
+        if (!item || !item.accessionNumber || !item.cik || !item.fundName || !item.periodOfReport) {
+            console.warn("Skipping invalid or incomplete filing item:", item);
+            continue;
+        }
 
+        // --- Parse Dates into Date objects ---
+        let filingDate: Date | undefined = undefined;
+        console.log(`Raw item.filingDate for ${item.accessionNumber}:`, item.filingDate, `(Type: ${typeof item.filingDate})`);
+        if (item.filingDate && typeof item.filingDate === 'string') { // Use new name 'filingDate'
+          const parsed = new Date(item.filingDate); // ISO strings parse directly
+          if (!isNaN(parsed.getTime())) {
+            filingDate = parsed;
+          } else {
+             console.warn(`Invalid filingDate format for ${item.accessionNumber}: ${item.filingDate}`); // Use new name
+          }
+        }
+
+        let acceptedDate: Date | undefined = undefined;
+        if (item.acceptedDate && typeof item.acceptedDate === 'string') {
+          const parsed = new Date(item.acceptedDate);
+           if (!isNaN(parsed.getTime())) {
+             acceptedDate = parsed;
+           } else {
+              console.warn(`Invalid acceptedDate format for ${item.accessionNumber}: ${item.acceptedDate}`);
+           }
+        }
+
+        // Keep periodOfReport as a string (YYYY-MM-DD)
+        const periodOfReport = item.periodOfReport ?? undefined;
+
+        // Construct the final Filing object
         const filing: Filing = {
-          ...item,
-          cik: String(item.cik),
-          filingDate: toDateFlexible(item.filingDate) ?? new Date(),
-          acceptedDate: toDateFlexible(item.acceptedDate),
-          periodOfReport: toDateFlexible(item.periodOfReport) ?? new Date(),
+          ...(item as FilingRaw), // Spread raw item first
+          accessionNumber: item.accessionNumber,
+          cik: String(item.cik), // Ensure CIK is a string
+          filingDate: filingDate,
+          acceptedDate: acceptedDate,
+          periodOfReport: periodOfReport,
           linkToFiling: `https://www.sec.gov/Archives/edgar/data/${
-            item.cik
+            String(item.cik)
           }/${String(item.accessionNumber).replace(/-/g, "")}/${
             item.accessionNumber
           }-index.htm`,
           fundName: item.fundName,
-          tableValueTotal: Number(item.tableValueTotal ?? 0),
-          isAmendment: Boolean(item.isAmendment ?? false),
+          tableValueTotal: Number(item.tableValueTotal ?? 0), // Ensure number
+          holdingsCount: Number(item.holdingsCount ?? 0), // Ensure number
+          // Handle boolean conversion safely
+          isAmendment: String(item.isAmendment).toLowerCase() === 'true',
+          holdingsFileKey: item.holdingsFileKey, // Pass through the key
         };
 
         result[item.accessionNumber] = filing;
       }
 
+      console.log(`Successfully processed ${Object.keys(result).length} filings.`); // Log final count
       setData(result);
+
     } catch (err: unknown) {
+      console.error("Error in fetchAll:", err); // Log the specific error
       setError(err instanceof Error ? err : new Error(String(err)));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // Dependency array is empty, fetchAll reference is stable
 
   useEffect(() => {
-    void fetchAll();
-  }, [fetchAll]);
+    void fetchAll(); // Run fetch on initial mount
+  }, [fetchAll]); // fetchAll is memoized by useCallback, effect runs once
 
   return { data, loading, error, refresh: fetchAll };
 }
