@@ -1,4 +1,4 @@
-import type { Holding } from "../types/filing";
+import type { Holding } from "./types";
 
 // Local holdings DB (seed data)
 import holdingsDb from "../data/holdings.json";

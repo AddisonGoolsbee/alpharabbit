@@ -21,18 +21,30 @@ export interface Holding {
   votingAuthority: VotingAuthority;
 }
 
+export interface HoldingsFile {
+  meta: FilingRaw;
+  holdings: Record<string /* cusip */, Holding>;
+}
+
 export interface FilingRaw {
+  accessionNumber: string;
   cik: string;
   filingDate: Timestamp;
   acceptedDate?: Timestamp;
   periodOfReport: Timestamp;
   fundName: string;
   tableValueTotal: number;
-  holdingIds: string[];
+  holdingsCount: number;
   isAmendment: boolean;
+  holdingsFileKey: string;
+}
+
+export interface FilingsFile {
+  filings: FilingRaw[];
 }
 
 export interface Filing {
+  accessionNumber: string;
   cik: string;
   filingDate: Date;
   acceptedDate?: Date;
@@ -40,8 +52,9 @@ export interface Filing {
   linkToFiling: string;
   fundName: string;
   tableValueTotal: number;
-  holdingIds: string[];
+  holdingsCount: number;
   isAmendment: boolean;
+  holdingsFileKey: string;
 }
 
 export type FilingsMap = Record<string, Filing>;

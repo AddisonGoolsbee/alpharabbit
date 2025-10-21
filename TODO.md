@@ -7,17 +7,20 @@
 - header w/ title, about, last updated, source code
 - logo + browser icon
 - dark/light mode
-- no internet notification
 - stock ticker integration
+- implement live update
+- more information dropdown thing which shows all the stuff we took out for simplicity
+- make nicer and color coded and show amendment etc of the rows
 
 ## Scraper
 
-- run every minute
 - scrape previous data
-    - scrape previous data from before it was standardized like this
+    - scrape previous data from before it was standardized like this, maybe from whale wisdom
 - handle amendments
+- separate 1s from 1000s in holdings
 
 ## Infra
 
 - domain name
 - gcp lambda thing running every minute
+- cdn + remember to disable public access

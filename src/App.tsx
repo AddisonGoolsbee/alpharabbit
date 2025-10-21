@@ -1,59 +1,9 @@
 import React, { useState, useEffect } from "react";
 import useFilings from "./hooks/useFilings";
-import getHoldingsForFiling from "./utils/getHoldings";
-import type { FilingsMap, Holding } from "./types/filing";
+import type { FilingsMap } from "./utils/types";
 import Loader from "./components/Loader";
-
-function formatNumber(n?: number) {
-  if (n == null) return "";
-  return n.toLocaleString();
-}
-
-function HoldingsTable({ holdings }: { holdings: Holding[] }) {
-  return (
-    <div className="bg-[#141414] rounded-md p-3">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-gray-400">
-              <th className="pb-2">Issuer</th>
-              <th className="pb-2">Class</th>
-              <th className="pb-2">CUSIP</th>
-              <th className="pb-2">Value</th>
-              <th className="pb-2">Shares</th>
-              <th className="pb-2">Type</th>
-              <th className="pb-2">Discretion</th>
-              <th className="pb-2">Voting (S/Sh/N)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {holdings.map((h, i) => (
-              <tr
-                key={i}
-                className="border-t border-gray-800 hover:bg-gray-900"
-              >
-                <td className="py-2">{h.nameOfIssuer}</td>
-                <td className="py-2">{h.titleOfClass}</td>
-                <td className="py-2">{h.cusip}</td>
-                <td className="py-2">{formatNumber(h.value)}</td>
-                <td className="py-2">
-                  {formatNumber(h.shrsOrPrnAmt?.sshPrnamt)}
-                </td>
-                <td className="py-2">{h.shrsOrPrnAmt?.sshPrnamtType}</td>
-                <td className="py-2">{h.investmentDiscretion}</td>
-                <td className="py-2">
-                  {formatNumber(h.votingAuthority?.sole)}/
-                  {formatNumber(h.votingAuthority?.shared)}/
-                  {formatNumber(h.votingAuthority?.none)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
+import HoldingsTable from "./components/HoldingsTable";
+import { formatNumber } from "./utils/common";
 
 export default function App(): React.ReactElement {
   const [openId, setOpenId] = useState<string | null>(null);
@@ -113,26 +63,40 @@ export default function App(): React.ReactElement {
                           if (!s)
                             return <span className="text-gray-400">-</span>;
                           const trimmed = String(s).trim();
-                          if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed))
-                            return trimmed.replace(/-/g, "/");
-                          const d = new Date(trimmed);
+                          let d: Date;
+                          if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+                            // Treat as UTC midnight
+                            d = new Date(trimmed + "T00:00:00Z");
+                          } else {
+                            d = new Date(trimmed);
+                          }
                           if (Number.isNaN(d.getTime()))
                             return <span className="text-gray-400">-</span>;
-                          const y = d.getFullYear();
-                          const m = String(d.getMonth() + 1).padStart(2, "0");
-                          const day = String(d.getDate()).padStart(2, "0");
+                          // Convert to EST (UTC-5, ignoring DST for simplicity)
+                          const estDate = new Date(
+                            d.getTime() - 5 * 60 * 60 * 1000
+                          );
+                          const y = estDate.getFullYear();
+                          const m = String(estDate.getMonth() + 1).padStart(
+                            2,
+                            "0"
+                          );
+                          const day = String(estDate.getDate()).padStart(
+                            2,
+                            "0"
+                          );
                           return `${y}/${m}/${day}`;
                         })()}
                       </td>
                       <td className="px-4 py-3">
                         <div className="inline-flex items-center gap-2 select-none text-sm text-gray-300">
                           <span className="hover:text-white font-bold">
-                            {getHoldingsForFiling(f).length} holding
-                            {getHoldingsForFiling(f).length > 1 ? "s" : ""}
+                            {f.holdingsCount} holding
+                            {f.holdingsCount != 1 ? "s" : ""}
                           </span>
                           <svg
                             className={`w-3 h-3 transform transition-transform ${
-                              openId === id ? "rotate-90" : ""
+                              openId === f.accessionNumber ? "rotate-90" : ""
                             }`}
                             viewBox="0 0 20 20"
                             fill="none"
@@ -164,7 +128,7 @@ export default function App(): React.ReactElement {
                     {openId === id && (
                       <tr className="bg-[#0f0f0f]">
                         <td colSpan={7} className="px-4 py-4">
-                          <HoldingsTable holdings={getHoldingsForFiling(f)} />
+                          <HoldingsTable holdingsFileKey={f.holdingsFileKey} />
                         </td>
                       </tr>
                     )}

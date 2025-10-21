@@ -1,5 +1,5 @@
 // dataClient/filingsClient.ts
-import type { Filing, FilingsMap } from "../types/filing";
+import type { Filing, FilingsMap } from "../utils/types";
 
 type FilingsState =
   | { status: "idle"; data: null; etag: string | null; error: null }
