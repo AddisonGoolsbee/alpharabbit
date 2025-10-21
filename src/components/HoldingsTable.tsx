@@ -62,10 +62,6 @@ function HoldingsTable({ holdingsFileKey }: { holdingsFileKey: string }) {
 
   return (
     <div className="bg-[#141414] rounded-md p-3">
-      {/* Example: you can show meta if desired */}
-      {/* <div className="mb-2 text-xs text-gray-400">
-        {doc.meta.fundName} • {doc.meta.periodOfReport} • {rows.length} positions
-      </div> */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
